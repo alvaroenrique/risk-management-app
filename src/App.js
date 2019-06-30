@@ -1,12 +1,15 @@
 import React from 'react';
-import logo from './logo.svg';
+import './css/style.scss';
+
+import EditableTable from './components/editable-table';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+    <div>
+      <header className="flex justify-center">
+        <h1 className="py-8 text-3xl">SOFTWARE DE GESTIÓN DE RIESGOS</h1>
       </header>
+      <EditableTable />
     </div>
   );
 }
