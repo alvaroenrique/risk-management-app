@@ -6,12 +6,14 @@ import Chart from './chart';
 import {db} from '../firebase';
 
 const tableHeader = [
+  '#',
   'Causas',
   'Evento del riesgo',
   'Consecuencias',
   'Probabilidad',
   'Impacto',
   'Nivel de riesgo',
+  'Nivel de riesgo (cualitativo)',
 ];
 
 function EditableTable() {
@@ -24,21 +26,29 @@ function EditableTable() {
   const [newProb, setNewProb] = useState('');
   const [newImpact, setNewImpact] = useState('');
 
+  const [timer, setTimer] = useState(false);
+
   useEffect(() => {
-    return db.collection('risks').onSnapshot(snap => {
-      const docs = [];
-      snap.forEach(doc => {
-        docs.push({
-          ...doc.data(),
-          id: doc.id,
+    return db
+      .collection('risks')
+      .orderBy('riskNum')
+      .onSnapshot(snap => {
+        const docs = [];
+        snap.forEach(doc => {
+          docs.push({
+            ...doc.data(),
+            id: doc.id,
+          });
         });
+        setBody(docs);
+        console.log(docs);
       });
-      setBody(docs);
-    });
   }, []);
 
   const addRisk = newRisk => {
     db.collection('risks').add(newRisk);
+    setTimer(true);
+    setTimeout(() => setTimer(false), 500);
   };
 
   const resetForm = () => {
@@ -47,6 +57,17 @@ function EditableTable() {
     setNewConsequence('');
     setNewProb('');
     setNewImpact('');
+  };
+
+  const isBetween = (a, x, b) => a < x && x <= b;
+
+  const getCualitRiskLevel = (prob, imp) => {
+    if (
+      (prob <= 0.6 && imp <= 0.2) ||
+      (prob <= 0.4 || isBetween(0.2, imp, 0.4))
+    )
+      return 'Baja';
+    return 'no calculado';
   };
 
   const handleAddRiskButton = () => {
@@ -58,6 +79,11 @@ function EditableTable() {
         prob: parseFloat(newProb),
         impact: parseFloat(newImpact),
         riskLevel: newProb * newImpact,
+        riskNum: body.length + 1,
+        cualitRiskLevel: getCualitRiskLevel(
+          parseFloat(newProb),
+          parseFloat(newImpact),
+        ),
       });
       setEditable(!editable);
       resetForm();
@@ -68,7 +94,7 @@ function EditableTable() {
 
   return (
     <>
-      <div className="w-2/3 mx-auto">
+      <div className="box-container">
         <div className="bg-white shadow-md rounded my-6">
           <table className="text-left w-full border-collapse">
             <thead>
@@ -88,6 +114,9 @@ function EditableTable() {
               {body.map(row => (
                 <tr key={row.id} className="hover:bg-gray-300">
                   <td className="py-4 px-6 border-b border-grey-light">
+                    {row.riskNum}
+                  </td>
+                  <td className="py-4 px-6 border-b border-grey-light">
                     {row.cause}
                   </td>
                   <td className="py-4 px-6 border-b border-grey-light">
@@ -105,11 +134,15 @@ function EditableTable() {
                   <td className="py-4 px-6 border-b border-grey-light">
                     {`${Math.round(row.riskLevel * 100)}%`}
                   </td>
+                  <td className="py-4 px-6 border-b border-grey-light">
+                    {row.cualitRiskLevel}
+                  </td>
                 </tr>
               ))}
 
               {editable && (
                 <tr className="">
+                  <td className="py-4 px-6 border-b border-grey-light" />
                   <td className="py-4 px-6 border-b border-grey-light">
                     <input
                       className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
@@ -179,7 +212,7 @@ function EditableTable() {
           )}
         </div>
       </div>
-      <Chart data={body} />
+      <div className="chart-container">{!timer && <Chart data={body} />}</div>
     </>
   );
 }

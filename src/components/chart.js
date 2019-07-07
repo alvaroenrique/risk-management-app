@@ -30,14 +30,21 @@ function ScatterChart(props) {
         range: 1,
       },
     },
-    series: [
-      {
-        name: 'SAMPLE A',
-        data: data.map(el => [el.impact, el.prob]),
-      },
-    ],
+    series: data.map(el => {
+      return {
+        name: `Riesgo ${el.riskNum}`,
+        data: [[el.impact, el.prob]],
+      };
+    }),
   };
-  console.log(chartConfig);
+  console.log(
+    data.map(el => {
+      return {
+        name: el.riskNum,
+        data: [el.impact, el.prob],
+      };
+    }),
+  );
   return (
     <div id="chart">
       <Chart
