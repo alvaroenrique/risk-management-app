@@ -64,10 +64,30 @@ function EditableTable() {
   const getCualitRiskLevel = (prob, imp) => {
     if (
       (prob <= 0.6 && imp <= 0.2) ||
-      (prob <= 0.4 || isBetween(0.2, imp, 0.4))
+      (prob <= 0.4 && isBetween(0.2, imp, 0.4))
     )
       return 'Baja';
-    return 'no calculado';
+    if (
+      (isBetween(0.6, prob, 0.8) && imp <= 0.2) ||
+      (isBetween(0.4, prob, 0.6) && isBetween(0.2, imp, 0.4)) ||
+      (prob <= 0.4 && isBetween(0.4, imp, 0.6))
+    )
+      return 'Moderada';
+    if (
+      (prob > 0.8 && imp <= 0.2) ||
+      (prob > 0.6 && isBetween(0.2, imp, 0.4)) ||
+      (isBetween(0.4, prob, 0.8) && isBetween(0.4, imp, 0.6)) ||
+      (prob <= 0.4 && isBetween(0.6, imp, 0.8))
+    )
+      return 'Alta';
+    if (
+      (prob > 0.8 && isBetween(0.4, imp, 0.6)) ||
+      (prob > 0.4 && isBetween(0.6, imp, 0.8)) ||
+      (prob > 0.2 && imp > 0.8)
+    )
+      return 'Extrema';
+
+    return 'ERROR';
   };
 
   const handleAddRiskButton = () => {
@@ -94,124 +114,125 @@ function EditableTable() {
 
   return (
     <>
-      <div className="box-container">
-        <div className="bg-white shadow-md rounded my-6">
-          <table className="text-left w-full border-collapse">
-            <thead>
-              <tr>
-                {tableHeader.map(el => (
-                  <th
-                    key={el}
-                    className="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light"
-                  >
-                    {el}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {body.map(row => (
-                <tr key={row.id} className="hover:bg-gray-300">
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {row.riskNum}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {row.cause}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {row.event}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {row.consequence}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {`${Math.round(row.prob * 100)}%`}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {`${Math.round(row.impact * 100)}%`}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {`${Math.round(row.riskLevel * 100)}%`}
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    {row.cualitRiskLevel}
-                  </td>
-                </tr>
+      <div className="box-container bg-white shadow-md rounded my-6">
+        <table className="text-left w-full border-collapse">
+          <thead>
+            <tr>
+              {tableHeader.map(el => (
+                <th
+                  key={el}
+                  className="py-4 px-6 bg-grey-lightest font-bold uppercase text-sm text-grey-dark border-b border-grey-light"
+                >
+                  {el}
+                </th>
               ))}
+            </tr>
+          </thead>
 
-              {editable && (
-                <tr className="">
-                  <td className="py-4 px-6 border-b border-grey-light" />
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    <input
-                      className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
-                      type="text"
-                      placeholder="Causas"
-                      value={newCauses}
-                      onChange={e => setNewCauses(e.target.value)}
-                    />
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    <input
-                      className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
-                      type="text"
-                      placeholder="Evento del riesgo"
-                      value={newEvent}
-                      onChange={e => setNewEvent(e.target.value)}
-                    />
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    <input
-                      className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
-                      type="text"
-                      placeholder="Consecuencias"
-                      value={newConsequence}
-                      onChange={e => setNewConsequence(e.target.value)}
-                    />
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    <input
-                      className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
-                      type="text"
-                      placeholder="Probabilidad"
-                      value={newProb}
-                      onChange={e => setNewProb(e.target.value)}
-                    />
-                  </td>
-                  <td className="py-4 px-6 border-b border-grey-light">
-                    <input
-                      className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
-                      type="text"
-                      placeholder="Impacto"
-                      value={newImpact}
-                      onChange={e => setNewImpact(e.target.value)}
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="flex justify-center">
+          <tbody>
+            {body.map(row => (
+              <tr key={row.id} className="hover:bg-gray-300">
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {row.riskNum}
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {row.cause}
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {row.event}
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {row.consequence}
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {`${Math.round(row.prob * 100)}%`}
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {`${Math.round(row.impact * 100)}%`}
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  {`${Math.round(row.riskLevel * 100)}%`}
+                </td>
+                <td
+                  className={`py-4 px-6 border-b border-grey-light ${row.cualitRiskLevel}`}
+                >
+                  {row.cualitRiskLevel}
+                </td>
+              </tr>
+            ))}
+
+            {editable && (
+              <tr className="">
+                <td className="py-4 px-6 border-b border-grey-light" />
+                <td className="py-4 px-6 border-b border-grey-light">
+                  <input
+                    className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
+                    type="text"
+                    placeholder="Causas"
+                    value={newCauses}
+                    onChange={e => setNewCauses(e.target.value)}
+                  />
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  <input
+                    className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
+                    type="text"
+                    placeholder="Evento del riesgo"
+                    value={newEvent}
+                    onChange={e => setNewEvent(e.target.value)}
+                  />
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  <input
+                    className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
+                    type="text"
+                    placeholder="Consecuencias"
+                    value={newConsequence}
+                    onChange={e => setNewConsequence(e.target.value)}
+                  />
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  <input
+                    className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
+                    type="text"
+                    placeholder="Probabilidad"
+                    value={newProb}
+                    onChange={e => setNewProb(e.target.value)}
+                  />
+                </td>
+                <td className="py-4 px-6 border-b border-grey-light">
+                  <input
+                    className="appearance-none bg-transparent border-none w-full text-gray-700 leading-tight focus:outline-none"
+                    type="text"
+                    placeholder="Impacto"
+                    value={newImpact}
+                    onChange={e => setNewImpact(e.target.value)}
+                  />
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-center mt-8">
+        <button
+          type="button"
+          className="rounded-full py-2 px-4 border-2 border-gray-700 text-gray-900 hover:border-orange-700 p-2 hover:text-orange-700"
+          onClick={handleAddRiskButton}
+        >
+          Agregar riesgo
+        </button>
+        {editable && (
           <button
             type="button"
-            className="rounded-full py-2 px-4 border-2 border-gray-700 text-gray-900 hover:border-orange-700 p-2 hover:text-orange-700"
-            onClick={handleAddRiskButton}
+            className="rounded-full py-2 border-2 border-red-700 text-red-700 hover:border-orange-700 p-2 hover:text-orange-700 ml-6"
+            onClick={() => setEditable(!editable)}
           >
-            Agregar riesgo
+            <CloseIcon svgClasses="text-red-700" svgFill="red" />
           </button>
-          {editable && (
-            <button
-              type="button"
-              className="rounded-full py-2 border-2 border-red-700 text-red-700 hover:border-orange-700 p-2 hover:text-orange-700 ml-6"
-              onClick={() => setEditable(!editable)}
-            >
-              <CloseIcon svgClasses="text-red-700" svgFill="red" />
-            </button>
-          )}
-        </div>
+        )}
       </div>
+
       <div className="chart-container">{!timer && <Chart data={body} />}</div>
     </>
   );

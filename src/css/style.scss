@@ -2,12 +2,24 @@
 
 .box-container {
   width: 90%;
-  // max-width: 1200px;
   margin: 0 auto;
+  overflow-x: auto;
 }
 .chart-container {
   width: 90%;
   max-width: 900px;
   margin: 0 auto;
   margin-top: 20px;
+}
+.Baja {
+  color: #6da06f;
+}
+.Moderada {
+  color: #ffbb43;
+}
+.Alta {
+  color: #ff8652;
+}
+.Extrema {
+  color: #c13525;
 }
